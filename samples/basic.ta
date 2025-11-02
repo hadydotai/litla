@@ -1,0 +1,29 @@
+fn arena_init(size: int) : Arena {}
+fn arena_len(arena: Arena) : int {}
+fn arena_cap(arena: Arena) : int {}
+fn arena_free(consumes arena: Arena) : void {}
+fn arena_resize(consumes arena: Arena) : void {}
+fn arena_alloc(arena: Arena, size: int) : void {}
+
+fn sizeof(val: T) : int {}
+
+fn new(): T {}
+fn equals(valA: T, valB: T): T {}
+fn plus(valA: T, valB: T): T {}
+fn minus(valA: T, valB: T): T {}
+fn lt(valA: T, valB: T): T {}
+fn gt(valA: T, valB: T): T {}
+
+fn allocation_loop() {
+    
+}
+
+fn main() : int {
+    let Obj = new();
+    let arena = arena_init(1000); 
+    if lt(minus(arena_len(arena), arena_cap(arena)), sizeof(Obj)) {
+        arena = arena_resize(arena, 2000);
+    }
+    //arena_free(arena);
+    let obj  = arena_alloc(arena, sizeof(Obj));
+}
