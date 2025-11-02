@@ -148,10 +148,11 @@ type Return struct {
 }
 
 type Expr struct {
-	Pos    lexer.Position
-	Call   *Call   `@@`
-	Ident  *string `| @Ident`
-	Number *string `| @Number`
+	Pos        lexer.Position
+	Call       *Call       `@@`
+	Assignment *Assignment `| @@`
+	Ident      *string     `| @Ident`
+	Number     *string     `| @Number`
 }
 
 type Call struct {

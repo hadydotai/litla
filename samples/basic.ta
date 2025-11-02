@@ -1,3 +1,12 @@
+/*
+
+Worth noting that none of this code here is intended to make any form of sense. This is just to test the control flow graph
+and our ability to enforce linear types on values. So, don't read into it too much. This code needs to output `A-OK`.
+
+I will leave comments to mark where a different statement would have resulted in consumption errors.
+
+*/
+
 fn arena_init(size: int) : Arena {}
 fn arena_len(arena: Arena) : int {}
 fn arena_cap(arena: Arena) : int {}
@@ -8,22 +17,39 @@ fn arena_alloc(arena: Arena, size: int) : void {}
 fn sizeof(val: T) : int {}
 
 fn new(): T {}
+fn reinitialize(consumes val: T): T {}
+
 fn equals(valA: T, valB: T): T {}
 fn plus(valA: T, valB: T): T {}
 fn minus(valA: T, valB: T): T {}
 fn lt(valA: T, valB: T): T {}
 fn gt(valA: T, valB: T): T {}
 
+fn inspect(val: T): void {}
+
 fn allocation_loop() {
-    
+    let arena = arena_init(1000);
+    let obj = reinitialize();
+    // ::undeclared_error if we remove the `let` decl above and move it into the `while`'s cond expression
+    // we'll get an undeclaration error on the `inspect` call, this is a side effect of the way I'm checking for
+    // linear types per environment, the reality is I'm treating the cond expression as an evaluation environment of it's
+    // own. I think for this type of syntax to work `while let x =...` I would need to merge those two environments, essentially
+    // a decl in the cond express or the body is the same, they both define local values.
+    // TODO(@hadydotai): Look into this.
+    while obj = reinitialize(obj) {
+        inspect(obj);
+    }
 }
 
 fn main() : int {
     let Obj = new();
     let arena = arena_init(1000); 
     if lt(minus(arena_len(arena), arena_cap(arena)), sizeof(Obj)) {
+        // ::consumption_error if we don't shadow `arena`, we'll consume it in arena_resize
+        // causing the merge point in the `obj` declaration to error out because `arena_alloc`
+        // would expect an available value, instead it gets a consumed value in this current env.
         arena = arena_resize(arena, 2000);
     }
-    //arena_free(arena);
     let obj  = arena_alloc(arena, sizeof(Obj));
+    allocation_loop();
 }
